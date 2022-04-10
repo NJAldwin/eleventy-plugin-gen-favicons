@@ -3,6 +3,7 @@ const fsp = fs.promises;
 const sharp = require('sharp');
 const path = require('path');
 const toIco = require('png-to-ico');
+const deepEq = require('fast-deep-equal');
 
 // derived from https://evilmartians.com/chronicles/how-to-favicon-in-2021-six-files-that-fit-most-needs
 // (2022 update)
@@ -24,6 +25,8 @@ const appleSize = 180;
 const appleSurround = 20;
 const googleHomeSize = 192;
 const googleLoadSize = 512;
+
+const cacheByFile = {};
 
 // expects square img
 const resizedSharp = async (fileName, fileMeta, newDim) => {
@@ -53,17 +56,21 @@ const defaultOpts = {
   appleIconBgColor: 'white',
   manifestData: {},
   generateManifest: true,
+  skipCache: false,
 };
 
 module.exports = async (srcFile, outputDir, opts) => {
-  const {appleIconBgColor, manifestData, generateManifest} = Object.assign({}, defaultOpts, opts);
+  const fullOpts = Object.assign({}, defaultOpts, opts);
+  const {appleIconBgColor, manifestData, generateManifest, skipCache} = fullOpts;
 
   if (!fs.existsSync(outputDir)) {
     await fsp.mkdir(outputDir);
   }
   const writeTo = (dest) => (buf) => fsp.writeFile(path.join(outputDir, dest), buf);
 
-  await fsp.stat(srcFile);
+  const mtime = (await fsp.stat(srcFile)).mtime;
+  const [cachedMtime, cachedOpts] = cacheByFile[`${srcFile}|${outputDir}`] || [0, {}];
+
   const srcMetadata = await sharp(srcFile).metadata();
   const srcIsSvg = srcMetadata.format === 'svg';
 
@@ -72,25 +79,29 @@ module.exports = async (srcFile, outputDir, opts) => {
     throw new Error('source favicon must be square');
   }
 
-  if (srcIsSvg) {
-    await fsp.copyFile(srcFile, path.join(outputDir, destSvg));
-  }
+  if (mtime > cachedMtime || (! deepEq(fullOpts, cachedOpts)) || skipCache) {
+    if (srcIsSvg) {
+      await fsp.copyFile(srcFile, path.join(outputDir, destSvg));
+    }
 
-  await Promise.all([
-    icoBuf(srcFile, srcMetadata).then(writeTo(destIco)),
-    appleBuf(appleIconBgColor)(srcFile, srcMetadata).then(writeTo(destApple)),
-    resizedSharp(srcFile, srcMetadata, googleHomeSize).then((s) => s.toBuffer()).then(writeTo(destGoogleHome)),
-    resizedSharp(srcFile, srcMetadata, googleLoadSize).then((s) => s.toBuffer()).then(writeTo(destGoogleLoading)),
-  ]);
+    await Promise.all([
+      icoBuf(srcFile, srcMetadata).then(writeTo(destIco)),
+      appleBuf(appleIconBgColor)(srcFile, srcMetadata).then(writeTo(destApple)),
+      resizedSharp(srcFile, srcMetadata, googleHomeSize).then((s) => s.toBuffer()).then(writeTo(destGoogleHome)),
+      resizedSharp(srcFile, srcMetadata, googleLoadSize).then((s) => s.toBuffer()).then(writeTo(destGoogleLoading)),
+    ]);
 
-  if (generateManifest) {
-    const manifest = Object.assign({}, manifestData, {
-      'icons': [
-        {'src': destGoogleHome, 'type': 'image/png', 'sizes': `${googleHomeSize}x${googleHomeSize}`},
-        {'src': destGoogleLoading, 'type': 'image/png', 'sizes': `${googleLoadSize}x${googleLoadSize}`},
-      ],
-    });
-    await fsp.writeFile(path.join(outputDir, destManifest), JSON.stringify(manifest), 'utf-8');
+    if (generateManifest) {
+      const manifest = Object.assign({}, manifestData, {
+        'icons': [
+          {'src': destGoogleHome, 'type': 'image/png', 'sizes': `${googleHomeSize}x${googleHomeSize}`},
+          {'src': destGoogleLoading, 'type': 'image/png', 'sizes': `${googleLoadSize}x${googleLoadSize}`},
+        ],
+      });
+      await fsp.writeFile(path.join(outputDir, destManifest), JSON.stringify(manifest), 'utf-8');
+    }
+
+    cacheByFile[`${srcFile}|${outputDir}`] = [mtime, fullOpts];
   }
 
   return Object.assign(

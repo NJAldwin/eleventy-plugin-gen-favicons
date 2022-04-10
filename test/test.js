@@ -78,8 +78,6 @@ const assertCorrectIcons = async (t, output, outDir, opts) => {
   }
 };
 
-// todo more sizes to test
-
 test('generates from test svg', async (t) => {
   const outDir = path.join(genDir, 'fromSvg');
   const output = await genFavicon(testSvg, outDir);
@@ -130,6 +128,80 @@ test('generates from arbitrarily sized square pngs', async (t) => {
 
     await assertCorrectIcons(t, output, outDir, {expectSvg: false});
   }));
+});
+
+test('caches given same src and dest', async (t) => {
+  const outDir = path.join(genDir, 'cacheSameTest');
+  const output = await genFavicon(testSvg, outDir);
+
+  await assertCorrectIcons(t, output, outDir);
+
+  await fs.promises.rm(outDir, {recursive: true, force: true});
+  // should hit in-mem cache & not create new files
+  const output2 = await genFavicon(testSvg, outDir);
+
+  t.deepEqual(output, output2);
+  t.false(fs.existsSync(path.join(outDir, expectedFiles['svg'])));
+  t.false(fs.existsSync(path.join(outDir, expectedFiles['ico'])));
+  t.false(fs.existsSync(path.join(outDir, expectedFiles['apple'])));
+  t.false(fs.existsSync(path.join(outDir, expectedFiles['googleHome'])));
+  t.false(fs.existsSync(path.join(outDir, expectedFiles['googleLoading'])));
+  t.false(fs.existsSync(path.join(outDir, expectedFiles['manifest'])));
+});
+
+test('does not cache if skipCache specified', async (t) => {
+  const outDir = path.join(genDir, 'cacheSkipTest');
+  const output = await genFavicon(testSvg, outDir);
+
+  await assertCorrectIcons(t, output, outDir);
+
+  await fs.promises.rm(outDir, {recursive: true, force: true});
+  const output2 = await genFavicon(testSvg, outDir, {skipCache: true});
+
+  t.deepEqual(output, output2);
+  await assertCorrectIcons(t, output2, outDir);
+});
+
+test('does not cache if file modified', async (t) => {
+  const srcFile = path.join(genDir, 'new-icon.png');
+  const mkIcon = async (color) => {
+    await sharp({
+      create: {
+        width: 128,
+        height: 128,
+        channels: 4,
+        background: color,
+      },
+    })
+        .png()
+        .toFile(srcFile);
+  };
+
+  const outDir = path.join(genDir, 'cacheModTest');
+  await mkIcon('red');
+  const output = await genFavicon(srcFile, outDir);
+
+  await assertCorrectIcons(t, output, outDir, {expectSvg: false});
+
+  await fs.promises.rm(outDir, {recursive: true, force: true});
+  await mkIcon('blue');
+  const output2 = await genFavicon(srcFile, outDir);
+
+  t.deepEqual(output, output2);
+  await assertCorrectIcons(t, output2, outDir, {expectSvg: false});
+});
+
+test('does not cache if options differ', async (t) => {
+  const outDir = path.join(genDir, 'cacheOptionsTest');
+  const output = await genFavicon(testSvg, outDir, {appleIconBgColor: 'red'});
+
+  await assertCorrectIcons(t, output, outDir);
+
+  await fs.promises.rm(outDir, {recursive: true, force: true});
+  const output2 = await genFavicon(testSvg, outDir, {appleIconBgColor: 'blue'});
+
+  t.deepEqual(output, output2);
+  await assertCorrectIcons(t, output2, outDir);
 });
 
 test('generates html with svg', async (t) => {
