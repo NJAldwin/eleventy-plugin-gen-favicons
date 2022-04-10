@@ -52,7 +52,7 @@ Include the `favicons` shortcode somewhere within `<head>` in your template (all
 
 ```njk
 <head>
-{% favicons 'my-source-image.svg' %}
+{% favicons 'my-source-image.svg', appleIconBgColor='#123' %}
 </head>
 ```
 
