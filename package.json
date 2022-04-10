@@ -1,0 +1,51 @@
+{
+  "name": "eleventy-plugin-gen-favicons",
+  "version": "0.0.1-alpha",
+  "description": "Favicon generator plugin for eleventy",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint *.js test/**.js",
+    "lintfix": "eslint --fix *.js test/**.js",
+    "test": "eslint *.js test/**.js && ava",
+    "posttest": "rm -rf test/gen/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NJAldwin/eleventy-plugin-gen-favicons.git"
+  },
+  "keywords": [
+    "eleventy",
+    "eleventy-utility",
+    "favicon"
+  ],
+  "author": {
+    "name": "Nick Aldwin",
+    "email": "Nick@Aldw.in",
+    "url": "https://nick.aldw.in/"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/NJAldwin/eleventy-plugin-gen-favicons/issues"
+  },
+  "homepage": "https://github.com/NJAldwin/eleventy-plugin-gen-favicons#readme",
+  "ava": {
+    "failFast": false,
+    "files": [
+      "./test/*.js"
+    ],
+    "ignoredByWatcher": [
+      "./test/img/*",
+      "./test/gen/*"
+    ]
+  },
+  "devDependencies": {
+    "ava": "^4.1.0",
+    "eslint": "^8.13.0",
+    "eslint-config-google": "^0.14.0",
+    "icojs": "^0.16.1"
+  },
+  "dependencies": {
+    "sharp": "^0.30.3",
+    "png-to-ico": "^2.1.4"
+  }
+}

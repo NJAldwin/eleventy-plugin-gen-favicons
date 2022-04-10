@@ -1,0 +1,15 @@
+env:
+  browser: true
+  commonjs: true
+  es2021: true
+extends:
+  - google
+parserOptions:
+  ecmaVersion: latest
+rules:
+  max-len:
+    - error
+    - 120
+  no-unused-vars:
+    - error
+    - varsIgnorePattern: "^_"
