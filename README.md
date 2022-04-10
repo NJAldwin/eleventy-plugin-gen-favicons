@@ -56,6 +56,8 @@ Include the `favicons` shortcode somewhere within `<head>` in your template (all
 </head>
 ```
 
+**NOTE** Do not use multiple `favicons` shortcodes with different images or bg colors.  Favicons are site-wide and this will result in undefined behavior.  It is fine to conditionally set a favicon, as long as it's site-wide.
+
 The shortcode accepts additional options:
 - `appleIconBgColor`: default `'white'` -- the color to use for the 20px border on the Apple icon; accepts anything that can be parsed by `color`, such as `'white'`, `'#fff'`, `{r: 128, g: 0, b: 255, alpha: 0.75}`, etc
 - `manifestData`: default `{}` -- additional data to include in the `.webmanifest` (e.g. `{'name': 'My Website'}`); overrides the plugin setting of the same name
