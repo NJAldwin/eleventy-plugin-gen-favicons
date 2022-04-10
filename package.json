@@ -1,6 +1,6 @@
 {
   "name": "eleventy-plugin-gen-favicons",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Favicon generator plugin for eleventy",
   "main": "index.js",
   "scripts": {
@@ -15,6 +15,7 @@
   },
   "keywords": [
     "eleventy",
+    "eleventy-plugin",
     "eleventy-utility",
     "favicon"
   ],

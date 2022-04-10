@@ -9,7 +9,7 @@ Include as a `{% favicons 'source-image.svg' %}` in your template.  On build, al
 Given a single square input icon file (preferably `.svg`), the following is generated:
 - `/favicon.svg` (only if a svg is provided)
 - `/favicon.ico` - 64x64/32x32/16x16 legacy icon
-- `/apple-touch-icon.png` - 160x160 Apple home screen icon with 20px colored padding
+- `/apple-touch-icon.png` - 180x180 Apple home screen icon including 20px colored padding
 - `/icon-192.png` - Google home screen icon
 - `/icon-512.png` - Google loading screen
 - `/manifest.webmanifest` - Manifest linking the Google icons; can be customized with additional data
