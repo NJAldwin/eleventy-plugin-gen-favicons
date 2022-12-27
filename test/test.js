@@ -33,6 +33,10 @@ test('errors on not square img', async (t) => {
   await t.throwsAsync(genFavicon('test/img/notsquare.png', genDir));
 });
 
+test('errors on too large apple padding', async (t) => {
+  await t.throwsAsync(genFavicon('test/img/testing.png', genDir, {appleIconPadding: 180}));
+});
+
 const assertCorrectIcons = async (t, output, outDir, opts) => {
   const {expectSvg, expectManifest, extraManifest} =
     Object.assign({expectSvg: true, expectManifest: true, extraManifest: {}}, opts);
@@ -125,6 +129,28 @@ test('generates from arbitrarily sized square pngs', async (t) => {
         .png()
         .toFile(srcFile);
     const output = await genFavicon(srcFile, outDir, {appleIconBgColor: '#f00'});
+
+    await assertCorrectIcons(t, output, outDir, {expectSvg: false});
+  }));
+});
+
+test('generates from arbitrarily sized square pngs with apple padding override', async (t) => {
+  const sizes = [1, 2, 40, 64, 80, 812, 4096];
+
+  await Promise.all(sizes.map(async (dim) => {
+    const outDir = path.join(genDir, `fromGenPng2-${dim}`);
+    const srcFile = path.join(genDir, `src2-${dim}.png`);
+    await sharp({
+      create: {
+        width: dim,
+        height: dim,
+        channels: 4,
+        background: {r: 128, g: 0, b: 255, alpha: 0.75},
+      },
+    })
+        .png()
+        .toFile(srcFile);
+    const output = await genFavicon(srcFile, outDir, {appleIconBgColor: '#f00', appleIconPadding: 0});
 
     await assertCorrectIcons(t, output, outDir, {expectSvg: false});
   }));

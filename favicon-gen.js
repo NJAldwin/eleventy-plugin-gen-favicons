@@ -42,18 +42,19 @@ const icoBuf = async (fileName, fileMeta, dims = icoSizes) =>
       .then((s) => s.ensureAlpha().toBuffer())))
       .then(toIco);
 
-const appleBuf = (bgColor) => async (fileName, fileMeta) =>
-  resizedSharp(fileName, fileMeta, appleSize - (2 * appleSurround))
+const appleBuf = (bgColor, padding) => async (fileName, fileMeta) =>
+  resizedSharp(fileName, fileMeta, appleSize - (2 * padding))
       .then((s) => s.extend({
-        top: appleSurround,
-        bottom: appleSurround,
-        left: appleSurround,
-        right: appleSurround,
+        top: padding,
+        bottom: padding,
+        left: padding,
+        right: padding,
         background: bgColor,
       }).toBuffer());
 
 const defaultOpts = {
   appleIconBgColor: 'white',
+  appleIconPadding: appleSurround,
   manifestData: {},
   generateManifest: true,
   skipCache: false,
@@ -61,7 +62,7 @@ const defaultOpts = {
 
 module.exports = async (srcFile, outputDir, opts) => {
   const fullOpts = Object.assign({}, defaultOpts, opts);
-  const {appleIconBgColor, manifestData, generateManifest, skipCache} = fullOpts;
+  const {appleIconBgColor, appleIconPadding, manifestData, generateManifest, skipCache} = fullOpts;
 
   if (!fs.existsSync(outputDir)) {
     await fsp.mkdir(outputDir);
@@ -78,6 +79,9 @@ module.exports = async (srcFile, outputDir, opts) => {
   if (width !== height) {
     throw new Error('source favicon must be square');
   }
+  if (appleIconPadding < 0 || ((2 * appleIconPadding) >= appleSize)) {
+    throw new Error(`Apple icon padding must be >=0 and small enough to generate a ${appleSize}x${appleSize} image`);
+  }
 
   if (mtime > cachedMtime || (! deepEq(fullOpts, cachedOpts)) || skipCache) {
     if (srcIsSvg) {
@@ -86,7 +90,7 @@ module.exports = async (srcFile, outputDir, opts) => {
 
     await Promise.all([
       icoBuf(srcFile, srcMetadata).then(writeTo(destIco)),
-      appleBuf(appleIconBgColor)(srcFile, srcMetadata).then(writeTo(destApple)),
+      appleBuf(appleIconBgColor, appleIconPadding)(srcFile, srcMetadata).then(writeTo(destApple)),
       resizedSharp(srcFile, srcMetadata, googleHomeSize).then((s) => s.toBuffer()).then(writeTo(destGoogleHome)),
       resizedSharp(srcFile, srcMetadata, googleLoadSize).then((s) => s.toBuffer()).then(writeTo(destGoogleLoading)),
     ]);

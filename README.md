@@ -9,7 +9,7 @@ Include as a `{% favicons 'source-image.svg' %}` in your template.  On build, al
 Given a single square input icon file (preferably `.svg`), the following is generated:
 - `/favicon.svg` (only if a svg is provided)
 - `/favicon.ico` - 64x64/32x32/16x16 legacy icon
-- `/apple-touch-icon.png` - 180x180 Apple home screen icon including 20px colored padding
+- `/apple-touch-icon.png` - 180x180 Apple home screen icon including 20px (configurable) colored padding
 - `/icon-192.png` - Google home screen icon
 - `/icon-512.png` - Google loading screen
 - `/manifest.webmanifest` - Manifest linking the Google icons; can be customized with additional data
@@ -59,7 +59,8 @@ Include the `favicons` shortcode somewhere within `<head>` in your template (all
 **NOTE** Do not use multiple `favicons` shortcodes with different images or bg colors.  Favicons are site-wide and this will result in undefined behavior.  It is fine to conditionally set a favicon, as long as it's site-wide.
 
 The shortcode accepts additional options:
-- `appleIconBgColor`: default `'white'` -- the color to use for the 20px border on the Apple icon; accepts anything that can be parsed by `color`, such as `'white'`, `'#fff'`, `{r: 128, g: 0, b: 255, alpha: 0.75}`, etc
+- `appleIconBgColor`: default `'white'` -- the color to use for the Apple icon padding; accepts anything that can be parsed by `color`, such as `'white'`, `'#fff'`, `{r: 128, g: 0, b: 255, alpha: 0.75}`, etc
+- `appleIconPadding`: default `20` -- the size of the Apple icon padding in px per side (must be less than 90px)
 - `manifestData`: default `{}` -- additional data to include in the `.webmanifest` (e.g. `{'name': 'My Website'}`); overrides the plugin setting of the same name
 - `generateManifest`: default `true` -- set to `false` to disable manifest generation (if you're already generating a manifest separately); overrides the plugin setting of the same name
 
@@ -70,7 +71,7 @@ Examples:
 {% favicons 'favicon.png' %}
 {% favicons 'favicon.svg', appleIconBgColor='#000' %}
 {% favicons 'favicon.svg', appleIconBgColor='black', manifestData={name:'My Website'} %}
-{% favicons 'favicon.svg', appleIconBgColor='#f00', generateManifest=false %}
+{% favicons 'favicon.svg', appleIconBgColor='#f00', appleIconPadding=10, generateManifest=false %}
 ```
 
 Example generated HTML:
