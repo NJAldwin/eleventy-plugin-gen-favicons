@@ -50,6 +50,8 @@ const appleBuf = (bgColor, padding) => async (fileName, fileMeta) =>
         left: padding,
         right: padding,
         background: bgColor,
+      }).flatten({ // to remove alpha channel
+        background: bgColor,
       }).toBuffer());
 
 const defaultOpts = {
