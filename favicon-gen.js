@@ -70,7 +70,7 @@ module.exports = async (srcFile, outputDir, opts) => {
   const writeTo = (dest) => (buf) => fsp.writeFile(path.join(outputDir, dest), buf);
 
   const mtime = (await fsp.stat(srcFile)).mtime;
-  const [cachedMtime, cachedOpts] = cacheByFile[`${srcFile}|${outputDir}`] || [0, {}];
+  const [cachedMtime, cachedOpts] = cacheByFile[`${srcFile}|${outputDir}`] = [mtime, fullOpts] || [0, {}] 
 
   const srcMetadata = await sharp(srcFile).metadata();
   const srcIsSvg = srcMetadata.format === 'svg';
