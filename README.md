@@ -36,14 +36,14 @@ module.exports = function(eleventyConfig) {
 **NOTE** If you already have `module.exports`, only copy the `require` and `addPlugin` lines, as with all other plugins.
 
 The plugin accepts a few options (replace `{}` as necessary):
-- `outputDir`: default `./_site` -- where to generate the icons; should match the eleventy output directory
+- `outputDir`: where to generate the icons. By default Eleventy's configured output directory is used, but this override allows you to change that behaviour
 - `manifestData`: default `{}` -- additional data to include in the `.webmanifest` (e.g. `{'name': 'My Website'}`)
 - `generateManifest`: default `true` -- set to `false` to disable manifest generation (if you're already generating a manifest separately)
 
 Example:
 
 ```js
-  eleventyConfig.addPlugin(faviconsPlugin, {'outputDir': './generated_site', 'manifestData': {'name': 'My Website'}});
+  eleventyConfig.addPlugin(faviconsPlugin, {'manifestData': {'name': 'My Website'}});
 ```
 
 ## Usage

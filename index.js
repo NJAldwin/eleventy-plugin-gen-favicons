@@ -4,14 +4,15 @@ const genHtml = require('./html-gen');
 // plugin options
 // (manifestData & generateManifest can be overridden per shortcode)
 const defaultOptions = {
-  outputDir: './_site',
+  outputDir: '',
   manifestData: {},
   generateManifest: true,
   skipCache: false,
 };
 
 module.exports = (eleventyConfig, options) => {
-  const {outputDir, manifestData, generateManifest, skipCache} = Object.assign({}, defaultOptions, options);
+  const {outputDir: pOutputDir, manifestData, generateManifest, skipCache} = Object.assign({}, defaultOptions, options);
+  const outputDir = pOutputDir == '' ? eleventyConfig.directories.output : pOutputDir;
   // favicons shortcode
   // examples:
   // {% favicons 'favicon.svg' %}
