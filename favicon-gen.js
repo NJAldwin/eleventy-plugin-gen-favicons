@@ -26,7 +26,8 @@ const icoSizes = [64, 32, 16];
 const appleSize = 180;
 const appleSurround = 20;
 const googleHomeSize = 192;
-const googleLoadSize, maskableSize = 512;
+const googleLoadSize = 512;
+const maskableSize = 512;
 const maskableSurround = 52;
 
 const cacheByFile = {};
