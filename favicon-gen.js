@@ -80,7 +80,7 @@ module.exports = async (srcFile, outputDir, urlPath, opts) => {
   const {iconBgColor, appleIconPadding, maskableIconPadding, manifestData, generateManifest, skipCache} = fullOpts;
 
   if (!fs.existsSync(outputDir)) {
-    await fsp.mkdir(outputDir);
+    await fsp.mkdir(outputDir, { recursive: true });
   }
   const writeTo = (dest) => (buf) => fsp.writeFile(path.join(outputDir, dest), buf);
 
